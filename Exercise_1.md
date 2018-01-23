@@ -53,7 +53,7 @@ Usage of ./quiz:
 
 Here we see the options the program accepts. The `flag` package is providing this functionality for us. When we simply provide a binary to the user, this is how he can find out how to run the program.
 
-Next we try to read the csv file whose name the user as provided as an option.
+Next we try to read the csv file whose name the user has provided as an option.
 ```Go
 package main
 
@@ -115,6 +115,44 @@ func main() {
     exit(fmt.Sprintf("Failed to open the CSV file: %s\n", *csvFilename))
   }
   _ = file
+}
+
+func exit(msg string) {
+  fmt.Println(msg)
+  os.Exit(1)
+}
+```
+
+Next, we use the `csv` package to create a csv reader. The `csv` package has a `NewReader` function that takes an `io.Reader` as an argument and returns a csv reader. Since `file` is an `io.Reader` we can readily pass it in.
+
+The [io.Reader](https://golang.org/pkg/io/#Reader) and [io.Writer](https://golang.org/pkg/io/#Writer) are some of the most often used interfaces in Go. That is because they are very simple and have one method each. The `Reader` interface makes it easy to read not just from files but from strings, memory buffers, and byte slices as well. Similarly the `http.ResponseWriter` in the `net/http` package implements the `Writer` interface and this would allow us to use `fmt.Fprintf` to print to it if we wanted.
+
+Since we expect the csv file to be reasonably small we read it all at once. If there are no errors we print out the lines for now.
+
+```Go
+package main
+
+import (
+  "flag"
+  "fmt"
+  "os"
+  "csv"
+)
+
+func main() {
+  csvFilename := flag.String("csv", "problems.csv", "a csv file in the format of 'question,answer'")
+  flag.Parse()
+  
+  file, err := os.Open(*csvFilename)
+  if err != nil {
+    exit(fmt.Sprintf("Failed to open the CSV file: %s\n", *csvFilename))
+  }
+  r := csv.NewReader(file)
+  lines, err := r.ReadAll()
+  if err != nil {
+    exit("Failed to parse the provided CSV file.")
+  }
+  fmt.Println(lines)
 }
 
 func exit(msg string) {
