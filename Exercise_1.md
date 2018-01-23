@@ -38,11 +38,87 @@ To test our program so far we compile it using,
 ```bash
 $ go build .
 ```
+When we run the program as
+```bash
+$ ./quiz
+```
+nothing happens.
 
-When we run the program as `./quiz -h` or `./quiz --help` we get
+However, when we run the program as `./quiz -h` or `./quiz --help` we get
 ```
 Usage of ./quiz:
   -csv string
         a csv file in the format of 'question,answer' (default "problems.csv")
 ```
 
+Here we see the options the program accepts. The `flag` package is providing this functionality for us. When we simply provide a binary to the user, this is how he can find out how to run the program.
+
+Next we try to read the csv file whose name the user as provided as an option.
+```Go
+package main
+
+import (
+  "flag"
+  "fmt"
+  "os"
+)
+
+func main() {
+  csvFilename := flag.String("csv", "problems.csv", "a csv file in the format of 'question,answer'")
+  flag.Parse()
+  
+  file, err := os.Open(*csvFilename)
+  if err != nil {
+    fmt.Printf("Failed to open the CSV file: %s\n", *csvFilename)
+    os.Exit(1)
+  }
+  _ = file
+}
+```
+Remember that `flag.String` returns a pointer. This is why we have to dereference the pointer in the call to `os.Open`. If there is an  error we print out the name of the file that caused the error and exit the program with a non-zero exit code.
+
+Running the program so far gives,
+```bash
+$ go build . && ./quiz -csv=abc.csv
+Failed to open the CSV file: abc.csv
+```
+
+We can clearly see the file name that caused the error. In particular, if the file name had a space in it, the user would have been made aware of the fact that he has to enter the file name within quotes.
+
+```bash
+$ go build . && ./quiz -csv=ab cd.csv
+Failed to open the CSV file: ab
+```
+
+```bash
+$ go build . && ./quiz -csv="ab cd.csv"
+Failed to open the CSV file: ab cd.csv
+```
+
+A small variation of the above would be to create a separate function to print out the error and exit the program:
+
+```Go
+package main
+
+import (
+  "flag"
+  "fmt"
+  "os"
+)
+
+func main() {
+  csvFilename := flag.String("csv", "problems.csv", "a csv file in the format of 'question,answer'")
+  flag.Parse()
+  
+  file, err := os.Open(*csvFilename)
+  if err != nil {
+    exit(fmt.Sprintf("Failed to open the CSV file: %s\n", *csvFilename))
+  }
+  _ = file
+}
+
+func exit(msg string) {
+  fmt.Println(msg)
+  os.Exit(1)
+}
+```
