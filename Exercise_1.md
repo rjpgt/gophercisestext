@@ -19,7 +19,7 @@ Each line has the question as the first field and the answer as the second field
 
 We create a file named *main.go* in the directory *src/github.com/gophercises/quiz/* in our GOPATH.
 
-A reasonable default for the quiz file name is *problems.csv*. But we shall allow the user to enter another name as an option. For this we shall be using the `flag` package. We start our program by assigning a variable the csv file name.
+A reasonable default for the quiz file name is *problems.csv*. But we shall allow the user to enter another name as an option. For this we shall be using the `flag` package. We start our program by assigning a variable for the csv file name.
 
 
 ```Go
