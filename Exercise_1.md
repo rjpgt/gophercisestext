@@ -148,6 +148,7 @@ func main() {
     exit(fmt.Sprintf("Failed to open the CSV file: %s\n", *csvFilename))
   }
   r := csv.NewReader(file)
+  // Read all the lines at once
   lines, err := r.ReadAll()
   if err != nil {
     exit("Failed to parse the provided CSV file.")
@@ -159,4 +160,29 @@ func exit(msg string) {
   fmt.Println(msg)
   os.Exit(1)
 }
+```
+```bash
+$ go build . && ./quiz -csv=problems.csv
+[[5+5 10] [1+1 2] [8+3 11] [1+2 3] [8+6 14] [3+1 4] [1+4 5] [5+1 6] [2+3 5] [3+3 6] [2+4 6] [5+2 7]]
+```
+
+We can see that we get a 2D slice printed out where each inner slice has two parts, a question and its answer.
+
+We are now going to make a dedicated type for a problem. In the above, the question and answer for a problem were stored in a slice. But if we make a dedicated type for the problem we can have other ways in which we input the problems to the quiz.
+
+```Go
+// ...No change here
+
+func main() {
+
+// ...No change here
+
+}
+
+type problem struct {
+  q string
+  a string
+}
+
+// ...No change here
 ```
