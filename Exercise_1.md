@@ -127,7 +127,7 @@ Next, we use the `csv` package to create a csv reader. The `csv` package has a `
 
 The [io.Reader](https://golang.org/pkg/io/#Reader) and [io.Writer](https://golang.org/pkg/io/#Writer) are some of the most often used interfaces in Go. That is because they are very simple and have one method each. The `Reader` interface makes it easy to read not just from files but from strings, memory buffers, and byte slices as well. Similarly the `http.ResponseWriter` in the `net/http` package implements the `Writer` interface and this would allow us to use `fmt.Fprintf` to print to it if we wanted.
 
-Since we expect the csv file to be reasonably small we read it all at once. If there are no errors we print out the lines for now.
+Since we expect the csv file to be reasonably small we read it all at once. If there are no errors we just print out the lines for now.
 
 ```Go
 package main
@@ -168,15 +168,33 @@ $ go build . && ./quiz -csv=problems.csv
 
 We can see that we get a 2D slice printed out where each inner slice has two parts, a question and its answer.
 
-We are now going to make a dedicated type for a problem. In the above, the question and answer for a problem were stored in a slice. But if we make a dedicated type for the problem we can have other ways in which we input the problems to the quiz.
+We are now going to make a dedicated type for a problem. In the above, the question and answer for a problem were stored in a slice. But if we make a dedicated type for a problem changing the code when we input the problems to the quiz differently, say, using a json file instead of a csv file, will be easier.
 
 ```Go
 // ...No change here
 
 func main() {
 
-// ...No change here
+// ...No change till here
+  r := csv.NewReader(file)
+  // Read all the lines at once
+  lines, err := r.ReadAll()
+  if err != nil {
+    exit("Failed to parse the provided CSV file.")
+  }
+  problems := parseLines(lines)
+  fmt.Println(lines)
+}
 
+func parseLines(lines [][]string) []problem {
+  ret := make([]problem, len(lines))
+  for i, line := range lines {
+    ret[i] = problem {
+      q: line[0],
+      a: line[1],
+    }
+  }
+  return ret
 }
 
 type problem struct {
@@ -185,4 +203,36 @@ type problem struct {
 }
 
 // ...No change here
+```
+
+We have defined the type `problem` and a function `parseLines` that converts the content of the csv file into a slice of this type. Notice that since we know the length of the 2d slice from the csv reader we can create the slice of problems also to be of that size.
+
+Compiling and running the program now gives,
+
+```bash
+$ go build . && ./quiz -csv=problems.csv
+[{5+5 10} {1+1 2} {8+3 11} {1+2 3} {8+6 14} {3+1 4} {1+4 5} {5+1 6} {2+3 5} {3+3 6} {2+4 6} {5+2 7}]
+```
+
+which is a slice of our struct `problem`.
+
+Now let us iterate through the problems and print out the question in each problem:
+
+```Go
+// ...No change here
+
+func main() {
+
+// ...No change till here
+  problems := parseLines(lines)
+  
+  for i, p := range problems {
+    fmt.Printf("Problem #%d: %s = \n", i+1, p.q)
+  }
+}
+// ...No change here
+```
+
+```bash
+$ go build . && ./quiz -csv=problems.csv
 ```
