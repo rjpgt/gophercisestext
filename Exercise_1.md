@@ -168,7 +168,7 @@ $ go build . && ./quiz -csv=problems.csv
 
 We can see that we get a 2D slice printed out where each inner slice has two parts, a question and its answer.
 
-We are now going to make a dedicated type for a problem. In the above, the question and answer for a problem were stored in a slice. But if we make a dedicated type for a problem changing the code when we input the problems to the quiz differently, say, using a json file instead of a csv file, will be easier.
+We are now going to make a dedicated type for a problem. In the above, the question and answer for a problem were stored in a slice. But if we make a dedicated type for a problem, it will be easier to change the code when we input the problems to the quiz differently, say, using a json file instead of a csv file.
 
 ```Go
 // ...No change here
